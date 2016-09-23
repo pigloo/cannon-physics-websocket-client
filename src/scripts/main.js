@@ -36,13 +36,13 @@ class Main extends AbstractApplication {
             color: 0x2194ce,
             metalness: 0.5,
             roughness: 1,
-            //roughnessMap: this._texture
+            roughnessMap: this._texture
           }),
           1: new THREE.MeshStandardMaterial({
             color: 0x9d3131,
             metalness: 0.5,
             roughness: 1,
-            //roughnessMap: this._texture
+            roughnessMap: this._texture
           })
         };
 
