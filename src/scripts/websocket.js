@@ -16,6 +16,16 @@ class WebSocketConnection {
         this._txSocket.onmessage = function(evt) { self.onTxMessage(evt); };
         this._txSocket.onerror = function(evt) { self.onTxError(evt); };
 
+        document.addEventListener( 'keydown', function( e ) {
+            if( e.keyCode === 32 ) {
+                self.doTxSend({d: 'scatter'});
+                e.preventDefault();
+            }
+            if( e.keyCode === 85 ) {
+                self.doTxSend({d: 'updateAll'});
+                e.preventDefault();
+            }
+        });
     }
 
     onTxOpen(evt) {

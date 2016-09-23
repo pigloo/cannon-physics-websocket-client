@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import AbstractApplication from 'scripts/views/AbstractApplication';
 import WebSocketConnection from 'scripts/websocket';
-const glslify = require('glslify');
-const shaderVert = glslify('./../shaders/custom.vert');
-const shaderFrag = glslify('./../shaders/custom.frag');
+//const glslify = require('glslify');
+//const shaderVert = glslify('./../shaders/custom.vert');
+//const shaderFrag = glslify('./../shaders/custom.frag');
 
 class Main extends AbstractApplication {
     constructor(){
@@ -36,13 +36,13 @@ class Main extends AbstractApplication {
             color: 0x2194ce,
             metalness: 0.5,
             roughness: 1,
-            roughnessMap: this._texture
+            //roughnessMap: this._texture
           }),
           1: new THREE.MeshStandardMaterial({
             color: 0x9d3131,
             metalness: 0.5,
             roughness: 1,
-            roughnessMap: this._texture
+            //roughnessMap: this._texture
           })
         };
 
@@ -73,6 +73,7 @@ class Main extends AbstractApplication {
         len = frame.length;
 
         for(i = 0; i < len; i++){
+            if(frame[i] === null){console.log('null');}
             var material = this._materials[frame[i].c];
             var geometry = this._geometries[frame[i].rt];
             var ball = new THREE.Mesh(geometry, material);
@@ -86,17 +87,15 @@ class Main extends AbstractApplication {
     }
 
     updateBodyPositions(data){
+        var frame = this._bodyPositions;
         for(var i = 0; i < data.length; i++){
-            for(var j = 0; j < this._bodyPositions.length; j++){
-                if(data[i] !== null && data[i].id === this._bodyPositions[j].id){
-                    this._bodyPositions.splice(j,1);
-                    break;
+            for(var j = 0; j < frame.length; j++){
+                if(frame[j].id === data[i].id){
+                    frame[j] = data[i];
                 }
             }
-            this._bodyPositions.push(data[i]);
-            //console.log(data[i]);
-            //console.log(this._bodyPositions[j]);
         }
+        this._bodyPositions = frame;
     }
 
     addBody(data){
@@ -105,7 +104,7 @@ class Main extends AbstractApplication {
 
     removeBody(data){
         for(var i = 0; i < this._bodyPositions.length; i++){
-            if(this._bodyPositions.id === data.id){
+            if(this._bodyPositions[i].id === data.id){
                 this._bodyPositions.splice(i,1);
                 break;
             }
