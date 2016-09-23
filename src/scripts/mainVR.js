@@ -1,10 +1,10 @@
-import * as THREE from 'three'
-import AbstractVRApplication from 'scripts/views/AbstractVRApplication'
+import * as THREE from 'three';
+import AbstractVRApplication from 'scripts/views/AbstractVRApplication';
 
-const glslify = require('glslify')
-const shaderVert = glslify('./../shaders/custom.vert')
-const shaderFrag = glslify('./../shaders/custom.frag')
-const noiseMaterial = require('materials/noise')
+const glslify = require('glslify');
+const shaderVert = glslify('./../shaders/custom.vert');
+const shaderFrag = glslify('./../shaders/custom.frag');
+const noiseMaterial = require('materials/noise');
 
 class Main extends AbstractVRApplication {
     constructor(){

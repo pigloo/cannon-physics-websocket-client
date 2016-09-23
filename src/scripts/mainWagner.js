@@ -1,11 +1,11 @@
-import * as THREE from 'three'
-import dat from 'dat-gui'
-import WAGNER from '@superguigui/wagner/'
-import AbstractApplication from 'scripts/views/AbstractApplication'
-import BoxBlurPass from '@superguigui/wagner/src/passes/box-blur/BoxBlurPass'
-import FXAAPass from '@superguigui/wagner/src/passes/fxaa/FXAAPass'
-import ZoomBlurPassfrom from '@superguigui/wagner/src/passes/zoom-blur/ZoomBlurPass'
-import MultiPassBloomPass from '@superguigui/wagner/src/passes/bloom/MultiPassBloomPass'
+import * as THREE from 'three';
+import dat from 'dat-gui';
+import WAGNER from '@superguigui/wagner/';
+import AbstractApplication from 'scripts/views/AbstractApplication';
+import BoxBlurPass from '@superguigui/wagner/src/passes/box-blur/BoxBlurPass';
+import FXAAPass from '@superguigui/wagner/src/passes/fxaa/FXAAPass';
+import ZoomBlurPassfrom from '@superguigui/wagner/src/passes/zoom-blur/ZoomBlurPass';
+import MultiPassBloomPass from '@superguigui/wagner/src/passes/bloom/MultiPassBloomPass';
 
 class Main extends AbstractApplication {
 

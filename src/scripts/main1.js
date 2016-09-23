@@ -10,17 +10,17 @@ class Main extends AbstractApplication {
         super();
 
         this._sceneObjects = [];
-        this._bodyPositions = [];
+        this._objectPositions = [];
 
         this._renderer.shadowMap.enabled = true;
         this._renderer.shadowMap.type = THREE.PCFSoftShadowMap; //THREE.BasicShadowMap;
         this._renderer.setClearColor( 0x333333 );
 
         var callbacks = {
-            all: this.updateAllBodies.bind(this),
-            update: this.updateBodyPositions.bind(this),
-            add: this.addBody.bind(this),
-            remove: this.removeBody.bind(this)
+            all: this.allBalls.bind(this),
+            update: this.updateObjectList.bind(this),
+            add: this.addBall.bind(this),
+            remove: this.removeBall.bind(this)
         };
 
         var webSocketConnection = new WebSocketConnection(callbacks);
@@ -59,9 +59,9 @@ class Main extends AbstractApplication {
     }
 
     animate() {
-
         super.animate();
-
+        this.updateBalls();
+        /*
         var len = this._sceneObjects.length;
         for( var i = 0; i < len; i++) {
             this._scene.remove(this._sceneObjects[i]);
@@ -69,53 +69,70 @@ class Main extends AbstractApplication {
 
         this._sceneObjects = [];
 
-        var frame = this._bodyPositions;
-        len = frame.length;
-
+        len = this._objectPositions.length;
         for(i = 0; i < len; i++){
-            var material = this._materials[frame[i].c];
-            var geometry = this._geometries[frame[i].rt];
-            var ball = new THREE.Mesh(geometry, material);
-            ball.position.copy(frame[i].p);
-            ball.quaternion.copy(frame[i].q);
-            ball.castShadow = true;
-            ball.receiveShadow = true;
-            this._sceneObjects.push(ball);
-            this._scene.add(ball);
+            if(this._objectPositions[i] !== null){
+                var material = this._materials[this._objectPositions[i].c];
+                var geometry = this._geometries[this._objectPositions[i].rt];
+                var ball = new THREE.Mesh(geometry, material);
+                ball.position.copy(this._objectPositions[i].p);
+                ball.quaternion.copy(this._objectPositions[i].r);
+                ball.castShadow = true;
+                ball.receiveShadow = true;
+                this._sceneObjects.push(ball);
+                this._scene.add(ball);
+            }
+        }
+        */
+    }
+
+    allBalls(data){
+        for(var i=0;i<data.length;i++){
+            var ball = this.addBall(data[i]);
         }
     }
 
-    updateBodyPositions(data){
+    updateBalls(){
+        var data = this._objectPositions;
         for(var i = 0; i < data.length; i++){
-            for(var j = 0; j < this._bodyPositions.length; j++){
-                if(data[i] !== null && data[i].id === this._bodyPositions[j].id){
-                    this._bodyPositions.splice(j,1);
-                    break;
+            for(var j = 0; j < this._sceneObjects.length; j++){
+                if(data[i] !== null && data[i].id === this._sceneObjects[j].bid){
+                  this._sceneObjects[j].position.copy(data[i].p);
+                  this._sceneObjects[j].quaternion.copy(data[i].q);
                 }
             }
-            this._bodyPositions.push(data[i]);
-            //console.log(data[i]);
-            //console.log(this._bodyPositions[j]);
         }
     }
 
-    addBody(data){
-        this._bodyPositions.push(data);
+    addBall(data){
+        var material = this._materials[data.c];
+        var geometry = this._geometries[data.rt];
+        var ball = new THREE.Mesh(geometry, material);
+        ball.position.copy(data.p);
+        ball.quaternion.copy(data.q);
+        ball.bid = data.id;
+        ball.castShadow = true;
+        ball.receiveShadow = true;
+
+        this._scene.add(ball);
+        this._sceneObjects.push(ball);
     }
 
-    removeBody(data){
-        for(var i = 0; i < this._bodyPositions.length; i++){
-            if(this._bodyPositions.id === data.id){
-                this._bodyPositions.splice(i,1);
-                break;
+    removeBall(data){
+        //var len = this._sceneObjects.length;
+        for(var i = 0; i < this._sceneObjects.length; i++){
+            if(!this._sceneObjects[i].bid){ console.log(this._sceneObjects[i]); }
+            if(this._sceneObjects[i].bid === data.id){
+                this._scene.remove(this._sceneObjects[i]);
+                this._sceneObjects.splice(i,1);
             }
         }
     }
 
-    updateAllBodies(data){
-        this._bodyPositions = [];
+    updateObjectList(data){
+        this._objectPositions = [];
         if(data.length > 0){
-            this._bodyPositions = data;
+            this._objectPositions = data;
         }
     }
 

@@ -1,15 +1,13 @@
 class WebSocketConnection {
 
-    constructor(callBack){
-        this._tweetWsUri = "ws://physics-lillith.rhcloud.com:8000";
+    constructor(callbacks){
+        //this._tweetWsUri = "ws://physics-lillith.rhcloud.com:8000";
+        //this._tweetWsUri = "ws://54.244.69.173:8080"; //AMAZON
         //this._tweetWsUri = "ws://127.0.0.1:8080";
-        //this._tweetWsUri = "ws://192.168.0.32:8080";
+        this._tweetWsUri = "ws://192.168.0.32:8080";
         this._txSocket = new WebSocket(this._tweetWsUri);
 
-        this._callBack = callBack;
-
-        this._hillarySupporters = 0;
-        this._trumpSupporters = 0;
+        this._callbacks = callbacks;
 
         self = this;
 
@@ -32,8 +30,18 @@ class WebSocketConnection {
 
     onTxMessage(evt) {
         var object = JSON.parse(evt.data);
-        //console.log(object);
-        this._callBack(object.data);
+        if(object.s === "all"){
+            this._callbacks.all(object.d);
+        }
+        if(object.s === "update"){
+            this._callbacks.update(object.d);
+        }
+        if(object.s === "add"){
+            this._callbacks.add(object.d);
+        }
+        if(object.s === "remove"){
+            this._callbacks.remove(object.d);
+        }
     }
 
     onTxError(evt) {

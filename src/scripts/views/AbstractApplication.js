@@ -6,11 +6,12 @@ class AbstractApplication{
     constructor(){
 
         this._camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
-        this._camera.position.z = 400;
+        this._camera.position.z = 20;
+        this._camera.position.y = 10;
 
         this._scene = new THREE.Scene();
 
-        this._renderer = new THREE.WebGLRenderer();
+        this._renderer = new THREE.WebGLRenderer({ antialias: true });
         this._renderer.setPixelRatio( window.devicePixelRatio );
         this._renderer.setSize( window.innerWidth, window.innerHeight );
         document.body.appendChild( this._renderer.domElement );
@@ -22,7 +23,6 @@ class AbstractApplication{
         this._controls.enableZoom = true;
 
         window.addEventListener( 'resize', this.onWindowResize.bind(this), false );
-
 
     }
 
@@ -44,7 +44,6 @@ class AbstractApplication{
 
     }
 
-
     onWindowResize() {
 
         this._camera.aspect = window.innerWidth / window.innerHeight;
@@ -55,6 +54,7 @@ class AbstractApplication{
     }
 
     animate(timestamp) {
+
         requestAnimationFrame( this.animate.bind(this) );
 
         this._controls.update();
