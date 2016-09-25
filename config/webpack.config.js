@@ -105,6 +105,7 @@ module.exports = function configuration(options) {
     plugins.push(
         new CopyWebpackPlugin([
             {from: 'src/textures',to:'textures'},
+            {from: 'src/models', to: 'models'}
         ])
     );
 

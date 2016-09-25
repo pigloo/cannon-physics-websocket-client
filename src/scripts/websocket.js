@@ -18,14 +18,22 @@ class WebSocketConnection {
 
         document.addEventListener( 'keydown', function( e ) {
             if( e.keyCode === 32 ) {
-                self.doTxSend({d: 'scatter'});
+                self.doTxSend(JSON.stringify({d: 'scatter'}));
                 e.preventDefault();
             }
             if( e.keyCode === 85 ) {
-                self.doTxSend({d: 'updateAll'});
+                self.doTxSend(JSON.stringify({d: 'updateAll'}));
                 e.preventDefault();
             }
         });
+
+        if ( /*@cc_on!@*/ false) { // check for Internet Explorer
+            document.onfocusin = this.onFocus.bind(this);
+            document.onfocusout = this.onBlur.bind(this);
+        } else {
+            window.onfocus = this.onFocus.bind(this);
+            window.onblur = this.onBlur.bind(this);
+        }
     }
 
     onTxOpen(evt) {
@@ -66,6 +74,15 @@ class WebSocketConnection {
 
     closeConnection() {
         txSocket.close();
+    }
+
+    onBlur() {
+        document.body.className = 'blurred';
+    }
+
+    onFocus() {
+        document.body.className = 'focused';
+        this.doTxSend(JSON.stringify({d: 'updateAll'}));
     }
 
 }

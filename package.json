@@ -28,6 +28,7 @@
     "lodash": "^4.15.0",
     "raw-loader": "^0.5.1",
     "three": "^0.80.1",
+    "three-obj-loader": "^1.0.2",
     "transform-loader": "^0.2.3",
     "websocket": "^1.0.23",
     "webvr-boilerplate": "^0.4.6",
