@@ -2,9 +2,9 @@ class WebSocketConnection {
 
     constructor(callbacks){
         //this._tweetWsUri = "ws://physics-lillith.rhcloud.com:8000";
-        //this._tweetWsUri = "ws://54.244.69.173:8080"; //AMAZON
-        //this._tweetWsUri = "ws://127.0.0.1:8080";
-        this._tweetWsUri = "ws://192.168.0.32:8080";
+        //this._tweetWsUri = "ws://54.244.75.108:8080"; //AMAZON
+        this._tweetWsUri = "ws://127.0.0.1:8080";
+        //this._tweetWsUri = "ws://192.168.0.32:8080";
         this._txSocket = new WebSocket(this._tweetWsUri);
 
         this._callbacks = callbacks;

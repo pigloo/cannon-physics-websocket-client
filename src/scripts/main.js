@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import AbstractApplication from 'scripts/views/AbstractApplication';
 import WebSocketConnection from 'scripts/websocket';
-import ModelLoader from 'scripts/ModelLoader';
+//import ModelLoader from 'scripts/ModelLoader';
 //const glslify = require('glslify');
 //const shaderVert = glslify('./../shaders/custom.vert');
 //const shaderFrag = glslify('./../shaders/custom.frag');
@@ -9,6 +9,8 @@ import ModelLoader from 'scripts/ModelLoader';
 class Main extends AbstractApplication {
     constructor(){
         super();
+
+        //var modelLoader = new ModelLoader(this._scene);
 
         this._sceneObjects = [];
         this._bodyPositions = [];
@@ -35,38 +37,71 @@ class Main extends AbstractApplication {
         this._texture.anisotropy = 16;
 
         this._materials = {
-          0: new THREE.MeshStandardMaterial({
-            color: 0x2194ce,
-            metalness: 0.5,
-            roughness: 1,
-            roughnessMap: this._texture
-          }),
-          1: new THREE.MeshStandardMaterial({
-            color: 0x9d3131,
-            metalness: 0.5,
-            roughness: 1,
-            roughnessMap: this._texture
-          })
+            0: new THREE.MeshStandardMaterial({
+                color: 0x2194ce,
+                metalness: 0.5,
+                roughness: 1,
+                roughnessMap: this._texture,
+                //envMap: modelLoader.envTexture
+            }),
+            1: new THREE.MeshStandardMaterial({
+                color: 0x9d3131,
+                metalness: 0.5,
+                roughness: 1,
+                roughnessMap: this._texture,
+                //envMap: modelLoader.envTexture
+            })
         };
 
         this._geometries = {
-          0: new THREE.SphereBufferGeometry( 0.2, 24, 24 ),
+          //0: new THREE.SphereBufferGeometry( 0.2, 24, 24 ),
+          //1: new THREE.SphereBufferGeometry( 0.15, 24, 24 ),
+          0: new THREE.CylinderBufferGeometry( 0.4, 0.4, 0.1, 32 ),
           1: new THREE.SphereBufferGeometry( 0.15, 24, 24 ),
         };
 
         //this.addGround();
+        this.addFloor();
 
         this.addLights();
-
-        var modelLoader = new ModelLoader();
-
-        var funnelMaterial = new THREE.MeshStandardMaterial({color:0x999999, metalness: 0.5, roughness: 1, /*roughnessMap: this._texture,*/ transparent: true, opacity: 0.2});
-        var funnel = modelLoader.load('models/funnel.obj', this._scene, funnelMaterial);
 
         document.getElementById("canvas").addEventListener('mousedown', this.onDocumentMouseDown.bind(this), false);
         document.getElementById("canvas").addEventListener('touchstart', this.onDocumentTouchStart.bind(this), false);
 
         this.animate();
+
+        // https://blockchain.info/block-height/432816?format=json&cors=true
+
+        function getBlockHeight(){
+
+            var date = new Date();
+            var milliseconds = date.getTime();
+
+            var request = new XMLHttpRequest();
+            request.open('GET', 'https://blockchain.info/blocks/' + milliseconds + '?format=json', true);
+
+            request.onload = function() {
+                if (request.status >= 200 && request.status < 400) {
+                    // Success!
+                    var resp = request.responseText;
+                    var data = JSON.parse(resp);
+                    console.log(data);
+                } else {
+                    // We reached our target server, but it returned an error
+                    console.log('Error recieving block height');
+                }
+            };
+
+            request.onerror = function() {
+                // There was a connection error of some sort
+            };
+
+            request.send();
+
+        }
+
+        //getBlockHeight();
+
 
     }
 
@@ -128,35 +163,33 @@ class Main extends AbstractApplication {
 
     addLights() {
 
-        this._scene.add(new THREE.AmbientLight(0x3D4143));
+        this._scene.add(new THREE.AmbientLight(0x999999));
 
-        var light = new THREE.DirectionalLight(0xffffff, 1);
+        var light = new THREE.DirectionalLight(0x999999, 0.8);
         light.position.set(10, 20, 0);
         //light.target.position.set(0, 0, 0);
         light.castShadow = true;
         light.shadow.camera.near = 0;
-        light.shadow.camera.far = 30;
+        light.shadow.camera.far = 40;
         light.shadow.bias = 0.0001;
 
-        var d = 8;
+        var d = 12;
         light.shadow.camera.left = -d;
         light.shadow.camera.right = d;
         light.shadow.camera.top = d;
         light.shadow.camera.bottom = -d;
 
         light.shadow.mapSize.width = light.shadow.mapSize.height = 2048;
+        this._scene.add(light);
 
         //this._scene.add( new THREE.CameraHelper( light.shadow.camera ) );
 
-        this._scene.add(light);
-
-        /*
-        light = new THREE.DirectionalLight(0xffffff, 0.5);
+        light = new THREE.DirectionalLight(0x999999, 0.8);
         light.position.set(-10, 20, 0);
         //light.target.position.set(0, 0, 0);
         light.castShadow = true;
         light.shadow.camera.near = 0;
-        light.shadow.camera.far = 30;
+        light.shadow.camera.far = 40;
         //light.shadow.camera.fov = 70;
         light.shadow.bias = 0.0001;
 
@@ -165,21 +198,38 @@ class Main extends AbstractApplication {
         light.shadow.camera.top = d;
         light.shadow.camera.bottom = -d;
 
-        light.shadow.mapSize.width = light.shadow.mapSize.height = 1024;
+        light.shadow.mapSize.width = light.shadow.mapSize.height = 2048;
         this._scene.add(light);
 
         //this._scene.add( new THREE.CameraHelper( light.shadow.camera ) );
+
+        /*
+        light = new THREE.PointLight( 0xff0000, 1, 100 );
+        light.position.set( 0, -4, 0 );
+        this._scene.add( light );
+        this._scene.add(new THREE.PointLightHelper(light, 0.1));
         */
 
     }
 
     addGround(){
-        var boxGeometry = new THREE.BoxBufferGeometry(8, 0.5, 8);
+        var planeGeometry = new THREE.PlaneBufferGeometry(100, 100);
+        var planeMaterial = new THREE.MeshStandardMaterial({color:0x999999, metalness: 0.5, roughness: 1, roughnessMap: this._texture});
+        var planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+        planeMesh.position.set(0,-13.5,0);
+        planeMesh.receiveShadow = true;
+        //planeMesh.castShadow = true;
+        planeMesh.rotation.x = -Math.PI / 2;
+        this._scene.add(planeMesh);
+    }
+
+    addFloor(){
+        var boxGeometry = new THREE.BoxBufferGeometry( 8, 1, 8 );
         var boxMaterial = new THREE.MeshStandardMaterial({color:0x999999, metalness: 0.5, roughness: 1, roughnessMap: this._texture});
         var boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
-        boxMesh.position.set(0,0.74,0);
+        boxMesh.position.set(0,-3.5,0);
         boxMesh.receiveShadow = true;
-        boxMesh.castShadow = true;
+        //planeMesh.castShadow = true;
         this._scene.add(boxMesh);
     }
 
