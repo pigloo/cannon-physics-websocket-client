@@ -6,6 +6,7 @@ class WebSocketConnection {
         this._tweetWsUri = "ws://127.0.0.1:8080";
         //this._tweetWsUri = "ws://192.168.0.32:8080";
         this._txSocket = new WebSocket(this._tweetWsUri);
+        this._txSocket.binaryType = 'arraybuffer';
 
         this._callbacks = callbacks;
 
@@ -37,16 +38,17 @@ class WebSocketConnection {
     }
 
     onTxOpen(evt) {
-        console.log("TWEET SERVER CONNECTED");
+        console.log("SERVER CONNECTED");
         //console.log(evt);
     }
 
     onTxClose(evt) {
-        console.log("TWEET SERVER DISCONNECTED");
+        console.log("SERVER DISCONNECTED");
         console.log(evt);
     }
 
     onTxMessage(evt) {
+        /*
         var object = JSON.parse(evt.data);
         if(object.s === "all"){
             this._callbacks.all(object.d);
@@ -60,15 +62,48 @@ class WebSocketConnection {
         if(object.s === "remove"){
             this._callbacks.remove(object.d);
         }
+        */
+
+        //console.log(evt);
+
+
+
+        if (evt.length === 0) return;
+
+        var dataview = new DataView(evt.data);
+        //console.log(dataview);
+        var packetId = dataview.getUint8(0, true);
+
+        switch (packetId) {
+            case 1:
+                //console.log("ADD TX");
+                this._callbacks.add(evt.data);
+                break;
+            case 2:
+                //console.log("REMOVE TX");
+                this._callbacks.remove(evt.data);
+                break;
+            case 4:
+                //console.log("UPDATE");
+                this._callbacks.update(evt.data);
+                break;
+            case 8:
+                //console.log("UPDATE ALL");
+                this._callbacks.all(evt.data);
+                break;
+            default:
+                break;
+          }
+
     }
 
     onTxError(evt) {
-        console.log("TWEET SERVER CONNECTION ERROR");
+        console.log("SERVER CONNECTION ERROR");
         console.log(evt);
     }
 
     doTxSend(message) {
-        console.log("REQUESTING DATA FROM TWEET SERVER");
+        console.log("REQUESTING DATA FROM SERVER");
         this._txSocket.send(message);
     }
 

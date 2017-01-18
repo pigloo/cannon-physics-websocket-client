@@ -78,7 +78,7 @@ class Main extends AbstractApplication {
             var milliseconds = date.getTime();
 
             var request = new XMLHttpRequest();
-            request.open('GET', 'https://blockchain.info/blocks/' + milliseconds + '?format=json', true);
+            request.open('GET', 'https://blockchain.info/blocks/' + milliseconds + '?format=json');
 
             request.onload = function() {
                 if (request.status >= 200 && request.status < 400) {
@@ -118,8 +118,10 @@ class Main extends AbstractApplication {
 
         for(i = 0; i < this._bodyPositions.length; i++){
             if(this._bodyPositions[i] === null){console.log('null');}
-            var material = this._materials[this._bodyPositions[i].c];
-            var geometry = this._geometries[this._bodyPositions[i].rt];
+            //var material = this._materials[this._bodyPositions[i].c];
+            //var geometry = this._geometries[this._bodyPositions[i].rt];
+            var material = this._materials[0];
+            var geometry = this._geometries[0];
             var ball = new THREE.Mesh(geometry, material);
             ball.bodyId = this._bodyPositions[i].id;
             ball.position.copy(this._bodyPositions[i].p);
@@ -132,22 +134,64 @@ class Main extends AbstractApplication {
     }
 
     updateBodyPositions(data){
-        for(var i = 0; i < data.length; i++){
+
+        var view = new DataView(data);
+        var i32 = 0;
+        var length = view.getUint8(1);
+
+        for(var i = 0; i < length; i++){
+
+            i32 = i * 32;
+            var id = view.getUint32(2+i32+0);
+
             for(var j = 0; j < this._bodyPositions.length; j++){
-                if(this._bodyPositions[j].id === data[i].id){
-                    this._bodyPositions[j] = data[i];
+                if(this._bodyPositions[j].id === id){
+                    //this._bodyPositions[j] = data[i];
+
+                    var px = view.getFloat32(2+i32+4);
+                    var py = view.getFloat32(2+i32+8);
+                    var pz = view.getFloat32(2+i32+12);
+                    var position = {x:px,y:py,z:pz};
+
+                    var qw = view.getFloat32(2+i32+16);
+                    var qx = view.getFloat32(2+i32+20);
+                    var qy = view.getFloat32(2+i32+24);
+                    var qz = view.getFloat32(2+i32+28);
+                    var quaternion = {w:qw,x:qx,y:qy,z:qz};
+
+                    this._bodyPositions[j] = { id: id, p: position, q: quaternion };
                 }
             }
         }
     }
 
     addBody(data){
-        this._bodyPositions.push(data);
+
+        //this._bodyPositions.push(data);
+
+        var view = new DataView(data);
+
+        var id = view.getUint32(1);
+
+        var px = view.getFloat32(5);
+        var py = view.getFloat32(9);
+        var pz = view.getFloat32(13);
+        var position = {x:px,y:py,z:pz};
+
+        var qw = view.getFloat32(17);
+        var qx = view.getFloat32(21);
+        var qy = view.getFloat32(25);
+        var qz = view.getFloat32(29);
+        var quaternion = {w:qw,x:qx,y:qy,z:qz};
+
+        this._bodyPositions.push({ id: id, p: position, q: quaternion });
     }
 
     removeBody(data){
+        var view = new DataView(data);
+        var id = view.getUint32(1);
         for(var i = 0; i < this._bodyPositions.length; i++){
-            if(this._bodyPositions[i].id === data.id){
+            if(this._bodyPositions[i].id === id){
                 this._bodyPositions.splice(i,1);
                 break;
             }
@@ -156,9 +200,37 @@ class Main extends AbstractApplication {
 
     updateAllBodies(data){
         this._bodyPositions = [];
+        /*
         if(data.length > 0){
             this._bodyPositions = data;
         }
+        */
+        var view = new DataView(data);
+        var i32 = 0;
+        var length = view.getUint8(1);
+
+        //console.log("Array Length: " + data.byteLength);
+        //console.log("Update Length: " + length);
+
+        for(var i=0; i<length; i++){
+            i32 = i * 32;
+            //console.log(i32);
+            var id = view.getUint32(2+i32+0);
+
+            var px = view.getFloat32(2+i32+4);
+            var py = view.getFloat32(2+i32+8);
+            var pz = view.getFloat32(2+i32+12);
+            var position = {x:px,y:py,z:pz};
+
+            var qw = view.getFloat32(2+i32+16);
+            var qx = view.getFloat32(2+i32+20);
+            var qy = view.getFloat32(2+i32+24);
+            var qz = view.getFloat32(2+i32+28);
+            var quaternion = {w:qw,x:qx,y:qy,z:qz};
+
+            this._bodyPositions.push({ id: id, p: position, q: quaternion });
+        }
+
     }
 
     addLights() {
@@ -224,7 +296,7 @@ class Main extends AbstractApplication {
     }
 
     addFloor(){
-        var boxGeometry = new THREE.BoxBufferGeometry( 8, 1, 8 );
+        var boxGeometry = new THREE.BoxBufferGeometry( 5, 1, 5 );
         var boxMaterial = new THREE.MeshStandardMaterial({color:0x999999, metalness: 0.5, roughness: 1, roughnessMap: this._texture});
         var boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
         boxMesh.position.set(0,-3.5,0);
@@ -260,4 +332,5 @@ class Main extends AbstractApplication {
         }
     }
 }
+
 export default Main;
